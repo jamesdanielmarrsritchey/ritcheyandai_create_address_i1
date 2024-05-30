@@ -1,0 +1,15 @@
+Name: Ritchey&AI Create Address
+Implementation: 1
+Version: 0 (INCOMPLETE)
+Long Identifier: Ritchey&AI Create Address i1 v0
+Short Identifier: R&AICAi1v0
+Description: An EXPERIMENTAL program for creating a Bitcoin private key, public key, and address from a string. Read the notes before using! Currently the program is incomplete, and has not been fully tested.
+History:
+ - Project started May 30, 2024.
+ - Version 1 completed May 30, 2024.
+Author: James Daniel Marrs Ritchey
+Licensing: As is, this project is licensed under the CC0 1.0 Universal (https://creativecommons.org/publicdomain/zero/1.0/legalcode). However, if you compile this project's code, the compiler will bring in, or link to, foreign materials (e.g., headers, libraries, etc), which have their own licensing terms. As such, compiled binaries will have different licensing terms.
+Notes:
+ - This project was developed in part by using the tool GitHub Copilot Business.
+ - I only know some basics of C++, so vet the code before attempting to use/run it! For me, making this project was more about learning how to use AI tools than the actual project itself.
+ - This program is considered experimental at this stage, so don't be surprised if it doesn't work correctly. It's also currently incomplete.
