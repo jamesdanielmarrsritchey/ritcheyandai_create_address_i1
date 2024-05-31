@@ -1,35 +1,19 @@
 /*
-To compile and install this program on Debian, you need to have g++, the OpenSSL library, and the Bitcoin library installed. If they are not installed, you can install them using the following commands:
+To compile and install this program on Debian, you need to have g++, and the OpenSSL library installed. If they are not installed, you can install them using the following commands:
 
-First, install the necessary dependencies for libbitcoin:
+First, update your package lists:
 
 sudo apt-get update
-sudo apt-get install build-essential autoconf automake libtool pkg-config git libboost-all-dev
 
-Then, clone the libbitcoin repository:
+Then, install the necessary dependencies:
 
-git clone https://github.com/libbitcoin/libbitcoin.git
+sudo apt-get install build-essential g++ libssl-dev
 
-Navigate to the libbitcoin directory:
+Once g++ and OpenSSL are installed, you can compile the program using the following command:
 
-cd libbitcoin
+g++ -o program source.cpp -lssl -lcrypto
 
-Execute the following commands to build and install libbitcoin:
-
-./autogen.sh
-./configure
-make
-sudo make install
-
-Finally, run ldconfig to update the library cache:
-
-sudo ldconfig
-
-Once g++, OpenSSL, and Bitcoin are installed, you can compile the program using the following command:
-
-g++ -o program source.cpp -lssl -lcrypto -lbitcoin
-
-This command compiles the source.cpp file into an executable named "program" and links the OpenSSL and Bitcoin libraries to the program.
+This command compiles the source.cpp file into an executable named "program" and links the OpenSSL library to the program.
 
 To run the program, use the following command:
 
@@ -44,6 +28,7 @@ After moving the executable, you can run the program from any location using the
 program
 */
 
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -57,7 +42,36 @@ program
 #include <sstream>
 #include <iomanip> // Include iomanip for setw
 #include <openssl/ripemd.h>
-#include <bitcoin/bitcoin.hpp>
+
+void compute_ripemd160(const unsigned char* data, size_t data_len, unsigned char* md) {
+    EVP_MD_CTX* ctx = EVP_MD_CTX_new();
+    const EVP_MD* md_type = EVP_ripemd160();
+
+    if (ctx == nullptr || md_type == nullptr) {
+        // Handle error
+        return;
+    }
+
+    if (EVP_DigestInit_ex(ctx, md_type, nullptr) != 1) {
+        // Handle error
+        return;
+    }
+
+    if (EVP_DigestUpdate(ctx, data, data_len) != 1) {
+        // Handle error
+        return;
+    }
+
+    unsigned int md_len;
+    if (EVP_DigestFinal_ex(ctx, md, &md_len) != 1) {
+        // Handle error
+        return;
+    }
+
+    EVP_MD_CTX_free(ctx);
+}
+
+// Rest of your program code...
 
 std::string generatePrivateKey(const std::string& input)
 {
@@ -102,6 +116,32 @@ std::string generatePublicKey(const std::string& private_key)
     return public_key;
 }
 
+std::string base58_chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+
+std::string to_base58(std::string input) {
+    std::vector<unsigned char> v(input.begin(), input.end());
+    std::string result;
+    unsigned int carry;
+    while (!v.empty() && v.back() == 0) {
+        v.pop_back();
+    }
+    int size = v.size() * 138 / 100 + 1;
+    std::vector<unsigned char> b58(size);
+    for (auto& big : v) {
+        carry = big;
+        for (auto it = b58.rbegin(); it != b58.rend(); it++) {
+            carry += 256 * (*it);
+            *it = carry % 58;
+            carry /= 58;
+        }
+    }
+    auto it = std::find_if(b58.begin(), b58.end(), [](unsigned char x) { return x != 0; });
+    for (; it != b58.end(); it++) {
+        result += base58_chars[*it];
+    }
+    return result;
+}
+
 std::string generateAddress(const std::string& public_key)
 {
     unsigned char hash1[SHA256_DIGEST_LENGTH];
@@ -125,7 +165,7 @@ std::string generateAddress(const std::string& public_key)
     EVP_MD_CTX_free(mdctx);
 
     // Step 2: RIPEMD-160 hash
-    RIPEMD160(hash1, SHA256_DIGEST_LENGTH, hash2);
+    compute_ripemd160(hash1, SHA256_DIGEST_LENGTH, hash2);
 
     // Step 3: Add version byte
     address[0] = 0x00;
@@ -139,7 +179,8 @@ std::string generateAddress(const std::string& public_key)
     memcpy(address + 21, hash4, 4);
 
     // Step 7 and 8: Convert to base58
-    std::string btc_address = bc::encode_base58(bc::data_chunk(std::begin(address), std::end(address)));
+    std::string address_str(reinterpret_cast<char*>(address), sizeof(address));
+    std::string btc_address = to_base58(address_str);
 
     return btc_address;
 }

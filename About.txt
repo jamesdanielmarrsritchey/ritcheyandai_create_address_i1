@@ -1,9 +1,9 @@
 Name: Ritchey&AI Create Address
 Implementation: 1
-Version: 0 (INCOMPLETE)
-Long Identifier: Ritchey&AI Create Address i1 v0
-Short Identifier: R&AICAi1v0
-Description: An EXPERIMENTAL program for creating a Bitcoin private key, public key, and address from a string. Read the notes before using! Currently the program is incomplete, and has not been fully tested.
+Version: 0.1 (INCOMPLETE)
+Long Identifier: Ritchey&AI Create Address i1 v0.1
+Short Identifier: R&AICAi1v0.1
+Description: An EXPERIMENTAL program for creating a Bitcoin private key, public key, and P2PKH address from a string. Read the notes before using! Currently the program is not fully tested, or implemented.
 History:
  - Project started May 30, 2024.
  - Version 1 completed May 30, 2024.
